@@ -1,25 +1,89 @@
 package main
 
 import (
-  "fmt"
+	"fmt"
+	m "github.com/horcu/mafia-models"
 )
 
-//TIP To run your code, right-click the code and select <b>Run</b>. Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.
-
-func main() {
-  //TIP Press <shortcut actionId="ShowIntentionActions"/> when your caret is at the underlined or highlighted text
-  // to see how GoLand suggests fixing it.
-  s := "gopher"
-  fmt.Println("Hello and welcome, %s!", s)
-
-  for i := 1; i <= 5; i++ {
-	//TIP You can try debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-	// for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>. To start your debugging session, 
-	// right-click your code in the editor and select the <b>Debug</b> option. 
-	fmt.Println("i =", 100/i)
-  }
+type RulesEngine struct {
+	game *m.Game
 }
 
-//TIP See GoLand help at <a href="https://www.jetbrains.com/help/go/">jetbrains.com/help/go/</a>.
-// Also, you can try interactive lessons for GoLand by selecting 'Help | Learn IDE Features' from the main menu.
+func New(game *m.Game) (*RulesEngine, error) {
+	return &RulesEngine{game: game}, nil
+}
+
+func (re *RulesEngine) GetAllowedAbilities(playerBin string, currentStep m.Step) ([]*m.Ability, error) {
+	// 1. Find the current step
+
+	for _, s := range re.game.Steps {
+		if s.Bin == currentStep.Bin {
+			currentStep = *s
+			break
+		}
+	}
+	if currentStep.Bin == "" {
+		return nil, fmt.Errorf("invalid step: %s", currentStep.Bin)
+	}
+
+	// 2. Find the player's abilities
+	var gamer *m.Gamer
+	for _, c := range re.game.Gamers {
+		if c.Bin == playerBin {
+			gamer = c
+			break
+		}
+	}
+	if gamer == nil {
+		return nil, fmt.Errorf("invalid player: %s", playerBin)
+	}
+
+	// 3. Determine allowed abilities
+	var allowedAbilities []*m.Ability
+	for _, ability := range gamer.Abilities {
+		// Check if the ability is allowed in the current step
+		isAllowedInStep := false
+		for _, allowed := range currentStep.Allowed {
+			if allowed == ability.Name {
+				isAllowedInStep = true
+				break
+			}
+		}
+
+		if isAllowedInStep {
+			// Check ability frequency
+			switch ability.Frequency {
+			case "every":
+				allowedAbilities = append(allowedAbilities, ability)
+			case "once":
+				if ability.TimesUsed > -1 && ability.TimesUsed < 1 {
+					allowedAbilities = append(allowedAbilities, ability)
+				}
+			case "twice":
+				if ability.TimesUsed > -1 && ability.TimesUsed < 2 {
+					allowedAbilities = append(allowedAbilities, ability)
+				}
+			case "every_other":
+				if ability.TimesUsed == 0 {
+					allowedAbilities = append(allowedAbilities, ability)
+					ability.TimesUsed++
+					ability.CycleUsedIndex = re.game.Cycles
+				} else {
+					if ability.CycleUsedIndex%2 == 0 {
+						if re.game.Cycles%2 == 0 {
+							allowedAbilities = append(allowedAbilities, ability)
+						}
+					} else {
+						if 1%re.game.Cycles == 0 {
+							allowedAbilities = append(allowedAbilities, ability)
+						}
+					}
+				}
+			default:
+				return nil, fmt.Errorf("invalid ability frequency: %s", ability.Frequency)
+			}
+		}
+	}
+
+	return allowedAbilities, nil
+}
