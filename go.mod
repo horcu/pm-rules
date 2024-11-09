@@ -1,4 +1,4 @@
-module pm-rules
+module github.com/horcu/pm-rules
 
 go 1.23.2
 
