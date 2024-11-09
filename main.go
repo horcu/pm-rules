@@ -2,15 +2,20 @@ package main
 
 import (
 	"fmt"
-	m "github.com/horcu/mafia-models"
+	m "github.com/horcu/pm-models/types"
+	st "github.com/horcu/pm-store"
 )
 
 type RulesEngine struct {
-	game *m.Game
+	game  *m.Game
+	store *st.Store
 }
 
 func New(game *m.Game) (*RulesEngine, error) {
-	return &RulesEngine{game: game}, nil
+	return &RulesEngine{
+		game:  game,
+		store: st.NewStore(),
+	}, nil
 }
 
 func (re *RulesEngine) GetAllowedAbilities(playerBin string, currentStep m.Step) ([]*m.Ability, error) {
@@ -67,14 +72,14 @@ func (re *RulesEngine) GetAllowedAbilities(playerBin string, currentStep m.Step)
 				if ability.TimesUsed == 0 {
 					allowedAbilities = append(allowedAbilities, ability)
 					ability.TimesUsed++
-					ability.CycleUsedIndex = re.game.Cycles
+					ability.CycleUsedIndex = re.game.NightCycles
 				} else {
 					if ability.CycleUsedIndex%2 == 0 {
-						if re.game.Cycles%2 == 0 {
+						if re.game.NightCycles%2 == 0 {
 							allowedAbilities = append(allowedAbilities, ability)
 						}
 					} else {
-						if 1%re.game.Cycles == 0 {
+						if re.game.NightCycles%1 == 0 {
 							allowedAbilities = append(allowedAbilities, ability)
 						}
 					}
@@ -86,4 +91,67 @@ func (re *RulesEngine) GetAllowedAbilities(playerBin string, currentStep m.Step)
 	}
 
 	return allowedAbilities, nil
+}
+
+func (re *RulesEngine) ApplyAbility(g *m.Game, targetGamer *m.Gamer, ability string) bool {
+
+	switch ability {
+	case "kill":
+		if re.CanBeKilled(g, targetGamer) {
+			re.store.ApplyAbility("kill", g.Bin, targetGamer.Bin)
+			return true
+		}
+	case "trick":
+		if re.CanBeTricked(g, targetGamer) {
+			re.store.ApplyAbility("trick", g.Bin, targetGamer.Bin)
+			return true
+		}
+	case "mimic":
+		if re.CanBeMimicked(g, targetGamer) {
+			re.store.ApplyAbility("mimic", g.Bin, targetGamer.Bin)
+			return true
+		}
+	case "heal":
+		if re.CanBeHealed(g, targetGamer) {
+			re.store.ApplyAbility("heal", g.Bin, targetGamer.Bin)
+			return true
+		}
+	case "poison":
+		if re.CanBePoisoned(g, targetGamer) {
+			re.store.ApplyAbility("poison", g.Bin, targetGamer.Bin)
+			return true
+		}
+	case "block":
+		if re.CanBeBlocked(g, targetGamer) {
+			re.store.ApplyAbility("block", g.Bin, targetGamer.Bin)
+			return true
+		}
+	default:
+		return false
+	}
+	return false
+}
+
+func (re *RulesEngine) CanBeKilled(g *m.Game, gamer *m.Gamer) bool {
+	return true
+}
+
+func (re *RulesEngine) CanBeTricked(g *m.Game, gamer *m.Gamer) bool {
+	return true
+}
+
+func (re *RulesEngine) CanBeMimicked(g *m.Game, gamer *m.Gamer) bool {
+	return true
+}
+
+func (re *RulesEngine) CanBeHealed(g *m.Game, gamer *m.Gamer) bool {
+	return true
+}
+
+func (re *RulesEngine) CanBePoisoned(g *m.Game, gamer *m.Gamer) bool {
+	return true
+}
+
+func (re *RulesEngine) CanBeBlocked(g *m.Game, gamer *m.Gamer) bool {
+	return true
 }
