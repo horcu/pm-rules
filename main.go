@@ -1,4 +1,4 @@
-package main
+package pm_rules
 
 import (
 	"fmt"
