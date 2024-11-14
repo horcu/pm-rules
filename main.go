@@ -72,9 +72,10 @@ func (re *RulesEngine) GetAllowedAbilities(playerBin string, currentStep m.Step)
 				if ability.TimesUsed == 0 {
 					allowedAbilities = append(allowedAbilities, ability)
 					ability.TimesUsed++
-					ability.CycleUsedIndex = re.game.NightCycles
+					ability.CyclesUsedIndex = append(ability.CyclesUsedIndex, re.game.NightCycles)
 				} else {
-					if ability.CycleUsedIndex%2 == 0 {
+					var lastCycleUsedIn = ability.CyclesUsedIndex[len(ability.CyclesUsedIndex):1][0]
+					if lastCycleUsedIn%2 == 0 {
 						if re.game.NightCycles%2 == 0 {
 							allowedAbilities = append(allowedAbilities, ability)
 						}
