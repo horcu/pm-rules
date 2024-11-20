@@ -94,6 +94,24 @@ func (re *RulesEngine) GetAllowedAbilities(playerBin string, currentStep m.Step)
 	return allowedAbilities, nil
 }
 
+func (re *RulesEngine) UpdateAbilityUsage(g *m.Game, gamer *m.Gamer, ability *m.Ability) bool {
+
+	ab := gamer.Abilities[ability.Name]
+	ab.CyclesUsedIndex = append(ab.CyclesUsedIndex, g.NightCycles)
+	ab.TimesUsed++
+
+	// create an update gamer map
+	gamer.Abilities[ability.Name] = ab
+
+	mp := map[string]interface{}{
+		"abilities": gamer.Abilities,
+	}
+
+	//save the gamer to the store
+	return re.store.UpdateGamer(g.Bin, mp)
+
+}
+
 func (re *RulesEngine) ApplyAbility(g *m.Game, targetGamer *m.Gamer, ability string) bool {
 
 	switch ability {
