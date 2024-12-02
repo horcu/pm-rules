@@ -4,7 +4,7 @@ go 1.23.2
 
 require (
 	github.com/horcu/pm-models v0.0.0-20241128021645-75aad2a6a2cb
-	github.com/horcu/pm-store v0.0.0-20241202160113-35d4d22ce2d8
+	github.com/horcu/pm-store v0.0.0-20241202161941-3265188d194a
 )
 
 require (
