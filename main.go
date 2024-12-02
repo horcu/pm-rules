@@ -48,7 +48,7 @@ func (re *RulesEngine) ApplyAbility(g *m.Game, targetGamer *m.Gamer, ability str
 		}
 	case "hide":
 		if targetGamer.IsAlive && !re.GamerWasHidden(g, targetGamer) {
-			re.store.ApplyAbility("kill", g.Bin, targetGamer.Bin)
+			re.store.ApplyAbility("hide", g.Bin, targetGamer.Bin)
 			return true
 		}
 	case "trick":
