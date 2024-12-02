@@ -103,6 +103,8 @@ github.com/horcu/pm-models v0.0.0-20241109002024-d63f1f02c952 h1:RIUzdiv+davL+/n
 github.com/horcu/pm-models v0.0.0-20241109002024-d63f1f02c952/go.mod h1:raAJ/SXco8cBZcmj1Hmp6I0SSlNCkLOYPQ325ZIhuWM=
 github.com/horcu/pm-models v0.0.0-20241114170204-ef7fe03111b3 h1:CGG0YA22zsFJX6kanA5U2+yScwivJyKlDGSi/TuxRqI=
 github.com/horcu/pm-models v0.0.0-20241114170204-ef7fe03111b3/go.mod h1:raAJ/SXco8cBZcmj1Hmp6I0SSlNCkLOYPQ325ZIhuWM=
+github.com/horcu/pm-models v0.0.0-20241123023314-9c8f8bf29ff1 h1:L3WyCCc6g9Pw3Fq4HU3o0TNURgWLpw+ILfCLPZvsxy8=
+github.com/horcu/pm-models v0.0.0-20241123023314-9c8f8bf29ff1/go.mod h1:oGBgHVh9IPvvNulqrHqDZaAj4SRHGZSvO5Q+5AefMNM=
 github.com/horcu/pm-store v0.0.0-20241109003339-a18658ca2565 h1:5RbkqPI34INCLwO1xGsRWY9qdg7r1z9rVExzakPmQiE=
 github.com/horcu/pm-store v0.0.0-20241109003339-a18658ca2565/go.mod h1:eOrQkTChC+xn1kNf02M31OMPfs6mnnYZBFVxoN0MzR8=
 github.com/horcu/pm-store v0.0.0-20241114075630-246f2bf1405d h1:f60AVMg0gJmP2WDWkE1M8yZPUycA+/YrhNWpnGBvBuk=

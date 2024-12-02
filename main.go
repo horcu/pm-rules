@@ -1,7 +1,6 @@
 package pm_rules
 
 import (
-	"fmt"
 	m "github.com/horcu/pm-models/types"
 	st "github.com/horcu/pm-store"
 )
@@ -18,85 +17,14 @@ func New(game *m.Game) (*RulesEngine, error) {
 	}, nil
 }
 
-func (re *RulesEngine) GetAllowedAbilities(playerBin string, currentStep m.Step) ([]*m.Ability, error) {
-	// 1. Find the current step
-
-	for _, s := range re.game.Steps {
-		if s.Bin == currentStep.Bin {
-			currentStep = *s
-			break
-		}
-	}
-	if currentStep.Bin == "" {
-		return nil, fmt.Errorf("invalid step: %s", currentStep.Bin)
-	}
-
-	// 2. Find the player's abilities
-	var gamer *m.Gamer
-	for _, c := range re.game.Gamers {
-		if c.Bin == playerBin {
-			gamer = c
-			break
-		}
-	}
-	if gamer == nil {
-		return nil, fmt.Errorf("invalid player: %s", playerBin)
-	}
-
-	// 3. Determine allowed abilities
-	var allowedAbilities []*m.Ability
-	for _, ability := range gamer.Abilities {
-		// Check if the ability is allowed in the current step
-		isAllowedInStep := false
-		for _, allowed := range currentStep.Allowed {
-			if allowed == ability.Name {
-				isAllowedInStep = true
-				break
-			}
-		}
-
-		if isAllowedInStep {
-			// Check ability frequency
-			switch ability.Frequency {
-			case "every":
-				allowedAbilities = append(allowedAbilities, ability)
-			case "once":
-				if ability.TimesUsed > -1 && ability.TimesUsed < 1 {
-					allowedAbilities = append(allowedAbilities, ability)
-				}
-			case "twice":
-				if ability.TimesUsed > -1 && ability.TimesUsed < 2 {
-					allowedAbilities = append(allowedAbilities, ability)
-				}
-			case "every_other":
-				if ability.TimesUsed == 0 {
-					allowedAbilities = append(allowedAbilities, ability)
-					ability.TimesUsed++
-					ability.CyclesUsedIndex = append(ability.CyclesUsedIndex, re.game.NightCycles)
-				} else {
-					var lastCycleUsedIn = ability.CyclesUsedIndex[len(ability.CyclesUsedIndex):1][0]
-					if lastCycleUsedIn%2 == 0 {
-						if re.game.NightCycles%2 == 0 {
-							allowedAbilities = append(allowedAbilities, ability)
-						}
-					} else {
-						if re.game.NightCycles%1 == 0 {
-							allowedAbilities = append(allowedAbilities, ability)
-						}
-					}
-				}
-			default:
-				return nil, fmt.Errorf("invalid ability frequency: %s", ability.Frequency)
-			}
-		}
-	}
-
-	return allowedAbilities, nil
-}
-
 func (re *RulesEngine) UpdateAbilityUsage(g *m.Game, gamer *m.Gamer, ability *m.Ability) bool {
 
 	ab := gamer.Abilities[ability.Name]
+
+	if ab.CyclesUsedIndex == nil {
+		ab.CyclesUsedIndex = []int{}
+	}
+
 	ab.CyclesUsedIndex = append(ab.CyclesUsedIndex, g.NightCycles)
 	ab.TimesUsed++
 
@@ -152,25 +80,61 @@ func (re *RulesEngine) ApplyAbility(g *m.Game, targetGamer *m.Gamer, ability str
 }
 
 func (re *RulesEngine) CanBeKilled(g *m.Game, gamer *m.Gamer) bool {
-	return true
+
+	return gamer.IsAlive && !re.FateSealed(g, gamer)
 }
 
 func (re *RulesEngine) CanBeTricked(g *m.Game, gamer *m.Gamer) bool {
-	return true
+	return gamer.IsAlive && !re.FateSealed(g, gamer)
 }
 
 func (re *RulesEngine) CanBeMimicked(g *m.Game, gamer *m.Gamer) bool {
-	return true
+	return gamer.IsAlive && !re.FateSealed(g, gamer)
 }
 
 func (re *RulesEngine) CanBeHealed(g *m.Game, gamer *m.Gamer) bool {
-	return true
+	return gamer.IsAlive && re.GamerNeedsHealing(g, gamer)
 }
 
 func (re *RulesEngine) CanBePoisoned(g *m.Game, gamer *m.Gamer) bool {
-	return true
+	return gamer.IsAlive && !re.GamerWasHidden(g, gamer)
 }
 
 func (re *RulesEngine) CanBeBlocked(g *m.Game, gamer *m.Gamer) bool {
+	return gamer.IsAlive
+}
+
+func (re *RulesEngine) FateSealed(game *m.Game, gamer *m.Gamer) bool {
+
+	if gamer.Fate == nil {
+		return true
+	}
+
+	// fate cant be sealed if healed or hidden
+	var nonSealable []string
+
+	nonSealable = append(nonSealable, "74668334-c229-4a8a-86d6-ff1943f34754") // heal
+	nonSealable = append(nonSealable, "724b1b7f-f42e-4b4f-8393-b2ae38cb0d70") // hide once
+	nonSealable = append(nonSealable, "f5b7c9e1-0a64-4e9c-9291-7e3b36df891d") // hide every other
+
+	for _, n := range nonSealable {
+		if gamer.Fate.AbilityBin == n {
+			return false
+		}
+	}
 	return true
+
+}
+
+func (re *RulesEngine) GamerNeedsHealing(g *m.Game, gamer *m.Gamer) bool {
+	if gamer.Fate.AbilityBin == "afef47b0-a025-4feb-8961-8b8396018375" { // poisoned
+		return true
+	}
+
+	return false
+}
+
+func (re *RulesEngine) GamerWasHidden(g *m.Game, gamer *m.Gamer) bool {
+	return gamer.Fate != nil &&
+		(gamer.Fate.AbilityBin == "724b1b7f-f42e-4b4f-8393-b2ae38cb0d70" || gamer.Fate.AbilityBin == "f5b7c9e1-0a64-4e9c-9291-7e3b36df891d")
 }
