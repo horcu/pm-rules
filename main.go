@@ -38,79 +38,69 @@ func (re *RulesEngine) UpdateAbilityUsage(g *m.Game, gamer *m.Gamer, ability *m.
 
 }
 
-func (re *RulesEngine) ApplyAbility(g *m.Game, targetGamer *m.Gamer, ability string) bool {
+func (re *RulesEngine) ApplyAbility(g *m.Game, sourceChar *m.GameCharacter, targetGamer *m.Gamer, ability string) (bool, string) {
+
+	if !targetGamer.IsAlive {
+		return false, "target is dead"
+	}
 
 	switch ability {
 	case "kill":
-		if re.CanBeKilled(g, targetGamer) {
-			re.store.ApplyAbility("kill", g.Bin, targetGamer.Bin)
-			return true
-		}
+		re.store.ApplyAbility("kill", g.Bin, targetGamer.Bin)
+		return true, targetGamer.Name + " was marked for death by the " + sourceChar.Name
 	case "hide":
-		if targetGamer.IsAlive && !re.GamerWasHidden(g, targetGamer) {
-			re.store.ApplyAbility("hide", g.Bin, targetGamer.Bin)
-			return true
-		}
+		re.store.ApplyAbility("hide", g.Bin, targetGamer.Bin)
+		return true, targetGamer.Name + " hidden from danger by the " + sourceChar.Name
 	case "trick":
-		if re.CanBeTricked(g, targetGamer) {
-			re.store.ApplyAbility("trick", g.Bin, targetGamer.Bin)
-			return true
-		}
+		re.store.ApplyAbility("trick", g.Bin, targetGamer.Bin)
+		return true, targetGamer.Name + " was tricked into their decision by the " + sourceChar.Name
 	case "mimic":
-		if re.CanBeMimicked(g, targetGamer) {
-			re.store.ApplyAbility("mimic", g.Bin, targetGamer.Bin)
-			return true
-		}
+		re.store.ApplyAbility("mimic", g.Bin, targetGamer.Bin)
+		return true, targetGamer.Name + " had their abilities copied by the " + sourceChar.Name
 	case "heal":
 		if re.CanBeHealed(g, targetGamer) {
 			re.store.ApplyAbility("heal", g.Bin, targetGamer.Bin)
-			return true
+			return true, targetGamer.Name + " was healed by the " + sourceChar.Name
 		}
 	case "poison":
-		if re.CanBePoisoned(g, targetGamer) {
-			re.store.ApplyAbility("poison", g.Bin, targetGamer.Bin)
-			return true
-		}
+		re.store.ApplyAbility("poison", g.Bin, targetGamer.Bin)
+		return true, targetGamer.Name + " was poisoned by the " + sourceChar.Name
 	case "block":
-		if re.CanBeBlocked(g, targetGamer) {
-			re.store.ApplyAbility("block", g.Bin, targetGamer.Bin)
-			return true
-		}
+		re.store.ApplyAbility("block", g.Bin, targetGamer.Bin)
+		return true, targetGamer.Name + " was blocked by the " + sourceChar.Name
 	case "retaliate":
-		if targetGamer.IsAlive && !re.GamerWasHidden(g, targetGamer) {
-			re.store.ApplyAbility("retaliate", g.Bin, targetGamer.Bin)
-			return true
-		}
+		re.store.ApplyAbility("retaliate", g.Bin, targetGamer.Bin)
+		return true, targetGamer.Name + " killed for targetting the " + sourceChar.Name
 	case "investigate":
 		if targetGamer.IsAlive {
 			re.store.ApplyAbility("investigate", g.Bin, targetGamer.Bin)
-			return true
+			return true, targetGamer.Name + " was investigated by the " + sourceChar.Name
 		}
 	case "meet":
 		if targetGamer.IsAlive {
 			re.store.ApplyAbility("meet", g.Bin, targetGamer.Bin)
-			return true
+			return true, targetGamer.Name + " met with the " + sourceChar.Name
 		}
 	case "mark":
 		if targetGamer.IsAlive && !re.GamerWasHidden(g, targetGamer) {
 			re.store.ApplyAbility("mark", g.Bin, targetGamer.Bin)
-			return true
+			return true, targetGamer.Name + " was marked by the " + sourceChar.Name
 		}
 	case "direct":
 		// get the character to ensure that they are of type villains
 		char, err := re.store.GetCharacterByBin(targetGamer.Bin)
 		if err != nil {
-			return false
+			return false, "error getting character"
 		}
 		if !char.IsInnocent {
 			re.store.ApplyAbility("direct", g.Bin, targetGamer.Bin)
-			return true
+			return true, targetGamer.Name + " was directed in their decision by the " + sourceChar.Name
 		}
 
 	default:
-		return false
+		return false, "ability not found"
 	}
-	return false
+	return false, "invalid ability"
 }
 
 func (re *RulesEngine) CanBeKilled(g *m.Game, gamer *m.Gamer) bool {
