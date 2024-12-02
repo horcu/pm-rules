@@ -30,7 +30,7 @@ func (re *RulesEngine) UpdateAbilityUsage(g *m.Game, gamer *m.Gamer, ability *m.
 
 	// create an update gamer map
 	mp := map[string]interface{}{
-		"abilities": ab,
+		gamer.Bin + "/abilities": ab,
 	}
 
 	//save the gamer to the store
