@@ -3,8 +3,8 @@ module github.com/horcu/pm-rules
 go 1.23.2
 
 require (
-	github.com/horcu/pm-models v0.0.0-20241130134740-ad87051cb6a4
-	github.com/horcu/pm-store v0.0.0-20241202161941-3265188d194a
+	github.com/horcu/pm-models v0.0.0-20241202203003-808a3fd3fde4
+	github.com/horcu/pm-store v0.0.0-20241202202437-da48e7d8cbd1
 )
 
 require (
