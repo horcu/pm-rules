@@ -91,6 +91,11 @@ func (re *RulesEngine) ApplyAbility(g *m.Game, targetGamer *m.Gamer, ability str
 			re.store.ApplyAbility("meet", g.Bin, targetGamer.Bin)
 			return true
 		}
+	case "mark":
+		if targetGamer.IsAlive && !re.GamerWasHidden(g, targetGamer) {
+			re.store.ApplyAbility("mark", g.Bin, targetGamer.Bin)
+			return true
+		}
 	case "direct":
 		// get the character to ensure that they are of type villains
 		char, err := re.store.GetCharacterByBin(targetGamer.Bin)
