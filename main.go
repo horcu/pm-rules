@@ -136,15 +136,14 @@ func (re *RulesEngine) CanBeBlocked(g *m.Game, gamer *m.Gamer) bool {
 func (re *RulesEngine) GamerNeedsHealing(g *m.Game, gamer *m.Gamer) bool {
 
 	if gamer.Fate != nil {
-		return false
+		return gamer.Fate.AbilityBin == "afef47b0-a025-4feb-8961-8b8396018375"
 	}
-
-	return gamer.Fate.AbilityBin == "afef47b0-a025-4feb-8961-8b8396018375" // poisoned
+	return false
 }
 
 func (re *RulesEngine) GamerWasHidden(g *m.Game, gamer *m.Gamer) bool {
 	if gamer.Fate != nil {
-		return false
+		return gamer.Fate.AbilityBin == "724b1b7f-f42e-4b4f-8393-b2ae38cb0d70" || gamer.Fate.AbilityBin == "f5b7c9e1-0a64-4e9c-9291-7e3b36df891d"
 	}
-	return gamer.Fate.AbilityBin == "724b1b7f-f42e-4b4f-8393-b2ae38cb0d70" || gamer.Fate.AbilityBin == "f5b7c9e1-0a64-4e9c-9291-7e3b36df891d"
+	return false
 }
