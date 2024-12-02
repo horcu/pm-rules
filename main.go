@@ -46,6 +46,11 @@ func (re *RulesEngine) ApplyAbility(g *m.Game, targetGamer *m.Gamer, ability str
 			re.store.ApplyAbility("kill", g.Bin, targetGamer.Bin)
 			return true
 		}
+	case "hide":
+		if targetGamer.IsAlive && !re.GamerWasHidden(g, targetGamer) {
+			re.store.ApplyAbility("kill", g.Bin, targetGamer.Bin)
+			return true
+		}
 	case "trick":
 		if re.CanBeTricked(g, targetGamer) {
 			re.store.ApplyAbility("trick", g.Bin, targetGamer.Bin)
@@ -71,6 +76,32 @@ func (re *RulesEngine) ApplyAbility(g *m.Game, targetGamer *m.Gamer, ability str
 			re.store.ApplyAbility("block", g.Bin, targetGamer.Bin)
 			return true
 		}
+	case "retaliate":
+		if targetGamer.IsAlive && !re.GamerWasHidden(g, targetGamer) {
+			re.store.ApplyAbility("retaliate", g.Bin, targetGamer.Bin)
+			return true
+		}
+	case "investigate":
+		if targetGamer.IsAlive {
+			re.store.ApplyAbility("investigate", g.Bin, targetGamer.Bin)
+			return true
+		}
+	case "meet":
+		if targetGamer.IsAlive {
+			re.store.ApplyAbility("meet", g.Bin, targetGamer.Bin)
+			return true
+		}
+	case "direct":
+		// get the character to ensure that they are of type villains
+		char, err := re.store.GetCharacterByBin(targetGamer.Bin)
+		if err != nil {
+			return false
+		}
+		if !char.IsInnocent {
+			re.store.ApplyAbility("direct", g.Bin, targetGamer.Bin)
+			return true
+		}
+
 	default:
 		return false
 	}
