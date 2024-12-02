@@ -19,7 +19,7 @@ func New(game *m.Game) (*RulesEngine, error) {
 
 func (re *RulesEngine) UpdateAbilityUsage(g *m.Game, gamer *m.Gamer, ability *m.Ability) bool {
 
-	ab := gamer.Abilities[ability.Name]
+	ab := gamer.Abilities[ability.Bin]
 
 	if ab.CyclesUsedIndex == nil {
 		ab.CyclesUsedIndex = []int{}
@@ -29,10 +29,8 @@ func (re *RulesEngine) UpdateAbilityUsage(g *m.Game, gamer *m.Gamer, ability *m.
 	ab.TimesUsed++
 
 	// create an update gamer map
-	gamer.Abilities[ability.Name] = ab
-
 	mp := map[string]interface{}{
-		"abilities": gamer.Abilities,
+		"abilities": ab,
 	}
 
 	//save the gamer to the store
