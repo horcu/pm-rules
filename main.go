@@ -1,6 +1,7 @@
 package pm_rules
 
 import (
+	"github.com/horcu/pm-models/enums"
 	m "github.com/horcu/pm-models/types"
 	st "github.com/horcu/pm-store"
 )
@@ -40,60 +41,60 @@ func (re *RulesEngine) ApplyAbility(g *m.Game, sourceChar *m.GameCharacter, targ
 	}
 
 	switch ability {
-	case "kill":
+	case enums.Kill.String():
 		re.store.ApplyAbility("kill", g.Bin, targetGamer.Bin)
 		return true, targetGamer.Name + " was marked for death by the " + sourceChar.Name
-	case "hide":
+	case enums.Hide.String():
 		re.store.ApplyAbility("hide", g.Bin, targetGamer.Bin)
 		return true, targetGamer.Name + " hidden from danger by the " + sourceChar.Name
-	case "trick":
+	case enums.Trick.String():
 		re.store.ApplyAbility("trick", g.Bin, targetGamer.Bin)
 		return true, targetGamer.Name + " was tricked into their decision by the " + sourceChar.Name
-	case "mimic":
+	case enums.Mimic.String():
 		re.store.ApplyAbility("mimic", g.Bin, targetGamer.Bin)
 		return true, targetGamer.Name + " had their abilities copied by the " + sourceChar.Name
-	case "heal":
+	case enums.Heal.String():
 		if re.CanBeHealed(g, targetGamer) {
 			re.store.ApplyAbility("heal", g.Bin, targetGamer.Bin)
 			return true, targetGamer.Name + " was healed by the " + sourceChar.Name
 		}
-	case "poison":
+	case enums.Poison.String():
 		re.store.ApplyAbility("poison", g.Bin, targetGamer.Bin)
 		return true, targetGamer.Name + " was poisoned by the " + sourceChar.Name
-	case "block":
+	case enums.Block.String():
 		re.store.ApplyAbility("block", g.Bin, targetGamer.Bin)
 		return true, targetGamer.Name + " was blocked by the " + sourceChar.Name
-	case "retaliate":
+	case enums.Retaliate.String():
 		re.store.ApplyAbility("retaliate", g.Bin, targetGamer.Bin)
 		return true, targetGamer.Name + " killed for targetting the " + sourceChar.Name
-	case "investigate":
+	case enums.Investigate.String():
 		if targetGamer.IsAlive {
 			re.store.ApplyAbility("investigate", g.Bin, targetGamer.Bin)
 			return true, targetGamer.Name + " was investigated by the " + sourceChar.Name
 		}
-	case "meet":
-		if targetGamer.IsAlive {
-			re.store.ApplyAbility("meet", g.Bin, targetGamer.Bin)
-			return true, targetGamer.Name + " met with the " + sourceChar.Name
-		}
-	case "mark":
+	//case enums..String():
+	//	if targetGamer.IsAlive {
+	//		re.store.ApplyAbility("meet", g.Bin, targetGamer.Bin)
+	//		return true, targetGamer.Name + " met with the " + sourceChar.Name
+	//	}
+	case enums.Mark.String():
 		if targetGamer.IsAlive && !re.GamerWasHidden(g, targetGamer) {
 			re.store.ApplyAbility("mark", g.Bin, targetGamer.Bin)
 			return true, targetGamer.Name + " was marked by the " + sourceChar.Name
 		}
-	case "direct":
+	case enums.Direct.String():
 		// get the character to ensure that they are of type villains
 		char, err := re.store.GetCharacterByBin(targetGamer.Bin)
 		if err != nil {
 			return false, "error getting character"
 		}
-		if !char.IsInnocent {
+		if char.SideId == 0 {
 			re.store.ApplyAbility("direct", g.Bin, targetGamer.Bin)
 			return true, targetGamer.Name + " was directed in their decision by the " + sourceChar.Name
 		}
 
 	default:
-		return false, "ability not found"
+		return false, "ability not usable"
 	}
 	return false, "invalid ability"
 }
