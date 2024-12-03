@@ -84,7 +84,7 @@ func (re *RulesEngine) ApplyAbility(g *m.Game, sourceChar *m.GameCharacter, targ
 		}
 	case enums.Direct.String():
 		// get the character to ensure that they are of type villains
-		char, err := re.store.GetCharacterByBin(targetGamer.Bin)
+		char, err := re.store.GetCharacterByBin(targetGamer.CharacterId)
 		if err != nil {
 			return false, "error getting character"
 		}
